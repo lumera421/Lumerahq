@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#070b14"/>
+<meta name="robots" content="index, follow"/>
+<title>استودیو لومرا | دفتر مرکزی</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#070b14;--card:rgba(14,20,34,.92);--line:rgba(148,163,184,.14);
+  --text:#eef2ff;--muted:#94a3b8;--gold:#d4af37;--gold2:#f5e6b8;
+  --cyan:#22d3ee;--ok:#34d399;--danger:#f87171;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Vazirmatn,system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(900px 500px at 15% -10%,rgba(212,175,55,.12),transparent 55%),
+  radial-gradient(700px 420px at 100% 10%,rgba(34,211,238,.08),transparent 50%),
+  linear-gradient(180deg,#070b14,#0a1020 50%,#070b14)}
+#bg-grid{position:fixed;inset:0;z-index:0;opacity:.04;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.45) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.45) 1px,transparent 1px);
+  background-size:56px 56px}
+#app{position:relative;z-index:1;min-height:100dvh}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:22px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04)}
+.gold-text{background:linear-gradient(135deg,var(--gold2),var(--gold),#b8860b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.btn{border:0;border-radius:14px;padding:.85rem 1.1rem;font-weight:700;cursor:pointer;transition:.18s;font-family:inherit;color:var(--text)}
+.btn:active{transform:scale(.98)}
+.btn-gold{background:linear-gradient(135deg,#f5e6b8,#d4af37 45%,#b8860b);color:#1a1205;box-shadow:0 8px 28px rgba(212,175,55,.28)}
+.btn-ghost{background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.input{width:100%;border-radius:14px;border:1px solid var(--line);background:rgba(7,11,20,.55);color:var(--text);padding:.85rem 1rem;outline:none;font-family:inherit}
+.input:focus{border-color:rgba(212,175,55,.45);box-shadow:0 0 0 3px rgba(212,175,55,.12)}
+.hidden{display:none!important}
+.screen{min-height:100dvh;display:flex;flex-direction:column}
+.fade-in{animation:fadeIn .5s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.slide-up{animation:slideUp .45s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.menu-card{width:100%;text-align:right;padding:1.15rem 1.25rem;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid var(--line);cursor:pointer;transition:.2s}
+.menu-card:hover{border-color:rgba(212,175,55,.35);background:rgba(212,175,55,.05);transform:translateY(-2px)}
+.menu-card h3{margin:0 0 4px;font-size:15px;font-weight:700}
+.menu-card p{margin:0;font-size:12px;color:var(--muted);line-height:1.5}
+#check-overlay{position:fixed;inset:0;z-index:90;background:rgba(5,8,15,.88);display:none;align-items:center;justify-content:center;flex-direction:column;padding:24px;text-align:center}
+#check-overlay.on{display:flex}
+.check-circle{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(34,211,238,.15));border:2px solid var(--ok);display:flex;align-items:center;justify-content:center;font-size:42px;animation:popCheck .55s cubic-bezier(.2,1.2,.4,1)}
+@keyframes popCheck{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.chip{display:inline-flex;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;font-size:13px;font-weight:600}
+.chip.on{border-color:rgba(212,175,55,.5);background:rgba(212,175,55,.1);color:var(--gold2)}
+.react-btn{font-size:18px;padding:6px 10px;border-radius:12px;border:1px solid var(--line);background:transparent;cursor:pointer}
+.badge{font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(212,175,55,.12);color:var(--gold2);border:1px solid rgba(212,175,55,.25)}
+.admin-tab{padding:8px 14px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;color:var(--muted)}
+.admin-tab.on{border-color:rgba(212,175,55,.35);color:var(--gold2);background:rgba(212,175,55,.08)}
+.ticket{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:rgba(255,255,255,.02)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(14,20,34,.96);border:1px solid var(--line);padding:10px 18px;border-radius:12px;font-size:13px;z-index:200;opacity:0;transition:.3s;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.back-btn{width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);cursor:pointer;color:var(--text);font-size:16px;display:inline-flex;align-items:center;justify-content:center}
+.divider{height:1px;background:var(--line);margin:16px 0}
+
+/* Intro */
+#intro{position:fixed;inset:0;z-index:100;background:#05080f;display:flex;align-items:center;justify-content:center;flex-direction:column}
+#intro.done{animation:introOut .65s ease forwards;pointer-events:none}
+@keyframes introOut{to{opacity:0;visibility:hidden}}
+.intro-ring{width:120px;height:120px;border-radius:50%;border:1px solid rgba(212,175,55,.25);box-shadow:0 0 40px rgba(212,175,55,.15),inset 0 0 30px rgba(34,211,238,.08);display:flex;align-items:center;justify-content:center;animation:pulseRing 2s ease-in-out infinite}
+@keyframes pulseRing{50%{transform:scale(1.05)}}
+.intro-bar{width:160px;height:2px;margin-top:28px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+.intro-bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));animation:loadBar 2.2s ease forwards}
+@keyframes loadBar{to{width:100%}}
+
+/* Neumorphic gate */
+#gate{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+  background:
+    radial-gradient(800px 480px at 50% 0%,rgba(212,175,55,.08),transparent 50%),
+    linear-gradient(180deg,#0a0e18,#070b14)}
+#gate.on{display:flex}
+.neo-wrap{perspective:1200px;width:min(400px,90vw);height:min(400px,90vw)}
+.neo-circle{
+  width:100%;height:100%;border-radius:50%;
+  background:linear-gradient(145deg,#f3f0ea,#e4dfd6);
+  box-shadow:24px 24px 50px rgba(0,0,0,.35),-10px -10px 28px rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.5);
+  display:flex;align-items:center;justify-content:center;position:relative
+}
+.neo-circle::before{content:'';position:absolute;inset:12px;border-radius:50%;border:1px solid rgba(255,255,255,.7);box-shadow:inset 3px 3px 8px rgba(160,150,140,.2);pointer-events:none}
+.neo-inner{width:78%;text-align:center;position:relative;z-index:1}
+.neo-title{font-size:clamp(22px,5vw,28px);font-weight:800;color:#2a2520;margin:0 0 4px}
+.neo-sub{font-size:11px;color:#8a837a;margin:0 0 18px}
+.neo-field{position:relative;max-width:250px;margin:0 auto 12px}
+.neo-field input{
+  width:100%;height:42px;border:0;outline:none;border-radius:12px;background:#ece8e1;color:#2a2520;
+  font-size:14px;font-weight:600;padding:0 14px 0 40px;text-align:left;direction:ltr;font-family:inherit;
+  box-shadow:inset -5px -5px 10px rgba(255,255,255,.85),inset 5px 5px 10px rgba(180,170,160,.4)
+}
+.neo-field input:focus{box-shadow:inset -4px -4px 8px rgba(255,255,255,.9),inset 4px 4px 8px rgba(180,170,160,.35),0 0 0 1.5px rgba(184,134,11,.45)}
+.neo-field i{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.7;font-size:14px}
+.neo-btn{
+  width:100%;max-width:250px;height:40px;border:0;border-radius:12px;cursor:pointer;margin-top:6px;
+  background:#ece8e1;color:#2a2520;font-weight:800;font-size:13px;letter-spacing:.4px;font-family:inherit;
+  box-shadow:8px 8px 16px rgba(160,150,140,.35),-6px -6px 14px rgba(255,255,255,.9)
+}
+.neo-btn.hot{background:linear-gradient(135deg,#c9a227,#8a7010);color:#fff}
+.neo-err{font-size:11px;color:#b91c1c;min-height:16px;margin:6px 0}
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="bg-grid"></div>
+
+<div id="intro">
+  <div class="intro-ring"><div class="gold-text" style="font-size:26px;font-weight:800">لومرا</div></div>
+  <div class="intro-bar"><i></i></div>
+  <p style="margin-top:18px;font-size:11px;color:var(--muted);letter-spacing:.14em">STUDIO HEADQUARTERS</p>
+</div>
+
+<div id="gate">
+  <div class="neo-wrap">
+    <div class="neo-circle">
+      <div class="neo-inner">
+        <h1 class="neo-title">Studio</h1>
+        <p class="neo-sub">ورود با نام کاربری</p>
+        <div class="neo-field"><i>✦</i><input id="gate-user" type="text" placeholder="username" autocomplete="username" maxlength="24"/></div>
+        <p class="neo-err" id="gate-err"></p>
+        <button type="button" class="neo-btn" id="gate-btn" onclick="enterGate()">ENTER</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <section id="s-home" class="screen hidden">
+    <div class="max-w-lg mx-auto w-full px-5 py-8 flex-1 flex flex-col justify-center fade-in">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] mb-4" style="border:1px solid rgba(212,175,55,.3);color:var(--gold2);background:rgba(212,175,55,.06)">✦ دفتر مرکزی کهکشان</div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold leading-relaxed gold-text">به دفتر مرکزی کهکشان لومرا<br/>خوش آمدید</h1>
+        <p class="mt-2 text-xs" style="color:var(--muted)">سلام، <b id="hello-name"></b></p>
+        <p class="mt-3 text-sm" style="color:var(--muted)">در کدام مورد نیاز به راهنمایی دارید؟</p>
+      </div>
+      <div class="space-y-3">
+        <button class="menu-card" onclick="go('news')"><h3>اخبار لومرا</h3><p>آخرین اخبار و اطلاعیه‌های رسمی استودیو</p></button>
+        <button class="menu-card" onclick="go('collab')"><h3>همکاری و پروژه</h3><p>پیشنهاد همکاری یا سپردن پروژه به تیم لومرا</p></button>
+        <button class="menu-card" onclick="go('support')"><h3>گفتگو با ادمین</h3><p>پشتیبانی محصولات لومرا و Lumera AI</p></button>
+      </div>
+      <div class="mt-8 text-center"><button class="btn btn-ghost text-xs" onclick="logoutUser()" style="opacity:.6">خروج</button></div>
+    </div>
+  </section>
+
+  <section id="s-news" class="screen hidden">
+    <div class="max-w-lg mx-auto w-full px-4 py-5">
+      <div class="flex items-center gap-3 mb-5"><button class="back-btn" onclick="go('home')">→</button><div><h2 class="text-lg font-bold m-0">اخبار لومرا</h2><p class="text-[11px] m-0" style="color:var(--muted)">اطلاعیه‌های رسمی</p></div></div>
+      <div id="news-list" class="space-y-3"></div>
+    </div>
+  </section>
+
+  <section id="s-news-detail" class="screen hidden">
+    <div class="max-w-lg mx-auto w-full px-4 py-5">
+      <div class="flex items-center gap-3 mb-5"><button class="back-btn" onclick="go('news')">→</button><h2 class="text-lg font-bold m-0">جزئیات خبر</h2></div>
+      <article class="glass p-5 slide-up">
+        <h3 id="nd-title" class="text-base font-bold mb-2"></h3>
+        <p id="nd-date" class="text-[11px] mb-4" style="color:var(--muted)"></p>
+        <div id="nd-body" class="text-sm leading-7 whitespace-pre-wrap" style="color:#dbe4ff"></div>
+        <div class="divider"></div>
+        <p class="text-xs mb-2" style="color:var(--muted)">واکنش شما</p>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button class="react-btn" onclick="reactNews('🔥')">🔥</button>
+          <button class="react-btn" onclick="reactNews('👏')">👏</button>
+          <button class="react-btn" onclick="reactNews('💎')">💎</button>
+          <button class="react-btn" onclick="reactNews('🚀')">🚀</button>
+          <button class="react-btn" onclick="reactNews('❤️')">❤️</button>
+        </div>
+        <div id="nd-react-stats" class="text-[11px] mb-4" style="color:var(--muted)"></div>
+        <p class="text-xs mb-2" style="color:var(--muted)">دیدگاه‌ها</p>
+        <div id="nd-comments" class="space-y-2 mb-3"></div>
+        <textarea id="cmt-body" class="input text-sm mb-2" rows="2" placeholder="نظر شما..."></textarea>
+        <button class="btn btn-gold w-full text-sm" onclick="sendComment()">ثبت دیدگاه</button>
+      </article>
+    </div>
+  </section>
+
+  <section id="s-collab" class="screen hidden">
+    <div class="max-w-lg mx-auto w-full px-4 py-5">
+      <div class="flex items-center gap-3 mb-5"><button class="back-btn" onclick="go('home')">→</button><div><h2 class="text-lg font-bold m-0">همکاری و پروژه</h2><p class="text-[11px] m-0" style="color:var(--muted)">تیم لومرا با شما در ارتباط خواهد بود</p></div></div>
+      <div class="glass p-5 space-y-4 slide-up" id="collab-step1">
+        <p class="text-sm leading-6">لطفاً <b>آی‌دی یکی از شبکه‌های اجتماعی خودتان</b> را مشخص کنید.</p>
+        <div class="flex flex-wrap gap-2" id="net-chips">
+          <button type="button" class="chip" data-n="روبیکا" onclick="pickNet(this)">روبیکا</button>
+          <button type="button" class="chip" data-n="تلگرام" onclick="pickNet(this)">تلگرام</button>
+          <button type="button" class="chip" data-n="ایتا" onclick="pickNet(this)">ایتا</button>
+          <button type="button" class="chip" data-n="واتساپ" onclick="pickNet(this)">واتساپ</button>
+          <button type="button" class="chip" data-n="لومرا" onclick="pickNet(this)">لومرا</button>
+          <button type="button" class="chip" data-n="اینستاگرام" onclick="pickNet(this)">اینستاگرام</button>
+        </div>
+        <button class="btn btn-gold w-full" onclick="collabNext()">ادامه</button>
+      </div>
+      <div class="glass p-5 space-y-4 slide-up hidden" id="collab-step2">
+        <p class="text-sm leading-6" id="collab-ask"></p>
+        <input id="collab-handle" class="input" dir="ltr" placeholder="@username" style="text-align:left"/>
+        <p class="text-[11px]" style="color:var(--muted)">حتماً با @ شروع شود</p>
+        <button class="btn btn-gold w-full" onclick="submitCollab()">ارسال درخواست</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-support" class="screen hidden">
+    <div class="max-w-lg mx-auto w-full px-4 py-5">
+      <div class="flex items-center gap-3 mb-5"><button class="back-btn" onclick="go('home')">→</button><div><h2 class="text-lg font-bold m-0">گفتگو با ادمین</h2><p class="text-[11px] m-0" style="color:var(--muted)">پشتیبانی رسمی محصولات</p></div></div>
+      <div class="glass p-5 space-y-4 slide-up" id="sup-step1">
+        <p class="text-sm">در چه موضوعی نیاز به پشتیبانی دارید؟</p>
+        <button class="menu-card" onclick="pickProduct('لومرا')"><h3>لومرا</h3><p>شبکه محتوا، پست، چت و بیشتر</p></button>
+        <button class="menu-card" onclick="pickProduct('لومرا AI')"><h3>لومرا AI</h3><p>هوش مصنوعی و ابزارها</p></button>
+      </div>
+      <div class="glass p-5 space-y-3 slide-up hidden" id="sup-step2">
+        <p class="text-sm mb-1" id="sup-cat-title"></p>
+        <div id="sup-cats" class="space-y-2"></div>
+      </div>
+      <div class="glass p-5 space-y-3 slide-up hidden" id="sup-step3">
+        <p class="text-sm" id="sup-sum"></p>
+        <textarea id="sup-msg" class="input text-sm" rows="4" placeholder="توضیح مشکل یا درخواست..."></textarea>
+        <input id="sup-contact" class="input text-sm" placeholder="راه ارتباطی (اختیاری)"/>
+        <button class="btn btn-gold w-full" onclick="submitSupport()">ارسال برای ادمین</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-admin" class="screen hidden">
+    <div class="max-w-lg mx-auto w-full px-4 py-5">
+      <div class="flex items-center justify-between mb-4">
+        <div><h2 class="text-lg font-bold m-0 gold-text">پنل مدیریت</h2><p class="text-[11px] m-0" style="color:var(--muted)">دسترسی ویژه ادمین</p></div>
+        <button class="btn btn-ghost text-xs" onclick="logoutUser()">خروج</button>
+      </div>
+      <div class="flex gap-1 mb-4 flex-wrap">
+        <button class="admin-tab on" data-t="news" onclick="adminTab('news')">اخبار</button>
+        <button class="admin-tab" data-t="support" onclick="adminTab('support')">پشتیبانی</button>
+        <button class="admin-tab" data-t="collab" onclick="adminTab('collab')">همکاری</button>
+      </div>
+      <div id="adm-news" class="space-y-3">
+        <div class="glass p-4 space-y-2">
+          <p class="text-xs font-semibold" style="color:var(--muted)">انتشار خبر جدید</p>
+          <input id="an-title" class="input text-sm" placeholder="عنوان خبر"/>
+          <textarea id="an-body" class="input text-sm" rows="4" placeholder="متن خبر..."></textarea>
+          <button class="btn btn-gold w-full text-sm" onclick="publishNews()">انتشار</button>
+        </div>
+        <div id="adm-news-list"></div>
+      </div>
+      <div id="adm-support" class="hidden space-y-2"></div>
+      <div id="adm-collab" class="hidden space-y-2"></div>
+    </div>
+  </section>
+</div>
+
+<div id="check-overlay">
+  <div class="check-circle">✓</div>
+  <p class="mt-5 text-base font-bold max-w-xs leading-7" id="check-msg"></p>
+  <button class="btn btn-ghost mt-6 text-sm" onclick="closeCheck()">بازگشت به صفحه اصلی</button>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL='https://cnvxbwdjuwczowaqgmia.supabase.co';
+const SUPABASE_ANON='sb_publishable_YYcneIhCMlFbqOMqUeg8XA_ZUwy6Gio';
+const OWNER='hesam';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+
+let user=null;
+let currentNewsId=null,selectedNet=null,selectedProduct=null,selectedCategory=null;
+let visitorId=localStorage.getItem('ls_vid')||('v_'+Math.random().toString(36).slice(2)+Date.now().toString(36));
+localStorage.setItem('ls_vid',visitorId);
+
+function $(id){return document.getElementById(id)}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2400)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function isOwnerName(u){return String(u||'').toLowerCase()===OWNER}
+function requireUser(){if(!user){showGate();return false}return true}
+function requireOwner(){return !!(user&&isOwnerName(user.username))}
+
+function showGate(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  $('gate').classList.add('on');
+  $('gate-err').textContent='';
+}
+function hideGate(){ $('gate').classList.remove('on') }
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    $('intro').classList.add('done');
+    setTimeout(()=>{
+      $('intro').style.display='none';
+      try{
+        const saved=JSON.parse(localStorage.getItem('ls_user')||'null');
+        if(saved&&saved.username){
+          user=saved;
+          afterLogin();
+        } else showGate();
+      }catch(e){ showGate() }
+    },650);
+  },2200);
+});
+
+function normalizeUser(raw){
+  return String(raw||'').trim().toLowerCase().replace(/\s+/g,'');
+}
+function validUsername(u){
+  if(!u) return 'نام کاربری لازم است';
+  if(u.length<3) return 'حداقل ۳ کاراکتر';
+  if(u.length>20) return 'حداکثر ۲۰ کاراکتر';
+  if(!/^[a-z0-9._]+$/.test(u)) return 'فقط حروف انگلیسی، عدد، . و _';
+  if(/^(admin|root|null|undefined)$/.test(u) && u!==OWNER) return 'این نام مجاز نیست';
+  return '';
+}
+
+async function enterGate(){
+  const btn=$('gate-btn');
+  const err=$('gate-err');
+  err.textContent='';
+  const username=normalizeUser($('gate-user').value);
+  const v=validUsername(username);
+  if(v){ err.textContent=v; return }
+  btn.classList.add('hot'); btn.disabled=true;
+  try{
+    // آیا از قبل هست؟
+    const {data:existing,error:e1}=await sb.from('studio_users').select('username').eq('username',username).maybeSingle();
+    if(e1){
+      // اگر جدول نیست پیام شفاف
+      if(String(e1.message||'').toLowerCase().includes('relation') || e1.code==='42P01'){
+        err.textContent='جدول‌ها ساخته نشده — SQL را در Supabase اجرا کنید';
+        return;
+      }
+      throw e1;
+    }
+    if(!existing){
+      const {error:e2}=await sb.from('studio_users').insert({username});
+      if(e2){
+        if(e2.code==='23505'){ err.textContent='این نام کاربری قبلاً گرفته شده'; return }
+        throw e2;
+      }
+    }
+    user={username};
+    localStorage.setItem('ls_user',JSON.stringify(user));
+    hideGate();
+    afterLogin();
+  }catch(e){
+    err.textContent='خطا در ورود. اتصال و SQL را چک کنید';
+    console.log(e);
+  }finally{
+    btn.disabled=false;
+    setTimeout(()=>btn.classList.remove('hot'),300);
+  }
+}
+
+function afterLogin(){
+  if(!user){ showGate(); return }
+  if(isOwnerName(user.username)){
+    // فقط پنل ادمین
+    go('admin');
+  } else {
+    $('hello-name').textContent=user.username;
+    go('home');
+  }
+}
+
+function logoutUser(){
+  user=null;
+  localStorage.removeItem('ls_user');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  showGate();
+}
+
+function go(name){
+  if(!requireUser()) return;
+  // کاربران عادی حق admin ندارند
+  if(name==='admin' && !requireOwner()){ go('home'); return }
+  // ادمین فقط admin می‌بیند
+  if(requireOwner() && name!=='admin'){ go('admin'); return }
+
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  const el=$('s-'+name);
+  if(el){ el.classList.remove('hidden'); el.classList.add('fade-in') }
+
+  if(name==='news') loadNews();
+  if(name==='admin' && requireOwner()){ adminTab('news'); loadAdminNews() }
+  if(name==='collab'){
+    selectedNet=null;
+    $('collab-step1').classList.remove('hidden');
+    $('collab-step2').classList.add('hidden');
+    document.querySelectorAll('#net-chips .chip').forEach(c=>c.classList.remove('on'));
+    $('collab-handle').value='';
+  }
+  if(name==='support'){
+    selectedProduct=null; selectedCategory=null;
+    $('sup-step1').classList.remove('hidden');
+    $('sup-step2').classList.add('hidden');
+    $('sup-step3').classList.add('hidden');
+  }
+}
+
+function dbErr(e){
+  const m=String((e&&e.message)||e||'');
+  if(m.includes('relation')||m.includes('does not exist')||(e&&e.code==='42P01'))
+    return 'جداول آماده نیست. فایل SQL را در Supabase دوباره Run کنید.';
+  return 'خطای سرور. کمی بعد دوباره تلاش کنید.';
+}
+
+/* NEWS */
+async function loadNews(){
+  const box=$('news-list');
+  box.innerHTML='<p class="text-xs text-center py-8" style="color:var(--muted)">بارگذاری...</p>';
+  try{
+    const {data,error}=await sb.from('studio_news').select('*').order('created_at',{ascending:false}).limit(40);
+    if(error) throw error;
+    if(!data||!data.length){
+      box.innerHTML='<div class="glass p-6 text-center text-sm" style="color:var(--muted)">هنوز خبری منتشر نشده</div>';
+      return;
+    }
+    box.innerHTML=data.map(n=>`
+      <button class="menu-card text-right" onclick="openNews(${n.id})">
+        <h3>${esc(n.title)}</h3>
+        <p>${esc((n.body||'').slice(0,90))}${(n.body||'').length>90?'…':''}</p>
+        <p class="text-[10px] mt-2" style="color:var(--muted)">${new Date(n.created_at).toLocaleDateString('fa-IR')}</p>
+      </button>`).join('');
+  }catch(e){ box.innerHTML='<div class="glass p-4 text-sm" style="color:var(--danger)">'+esc(dbErr(e))+'</div>' }
+}
+
+async function openNews(id){
+  currentNewsId=id; go('news-detail');
+  try{
+    const {data,error}=await sb.from('studio_news').select('*').eq('id',id).maybeSingle();
+    if(error) throw error;
+    if(!data){ toast('خبر نیست'); go('news'); return }
+    $('nd-title').textContent=data.title;
+    $('nd-date').textContent=new Date(data.created_at).toLocaleString('fa-IR');
+    $('nd-body').textContent=data.body;
+    loadReactions(id); loadComments(id);
+  }catch(e){ toast(dbErr(e)) }
+}
+
+async function loadReactions(id){
+  try{
+    const {data}=await sb.from('studio_news_reactions').select('reaction').eq('news_id',id);
+    const counts={}; (data||[]).forEach(r=>{counts[r.reaction]=(counts[r.reaction]||0)+1});
+    $('nd-react-stats').textContent=Object.keys(counts).length?Object.entries(counts).map(([k,v])=>k+' '+v).join('   '):'هنوز واکنشی نیست';
+  }catch(e){ $('nd-react-stats').textContent='' }
+}
+
+async function reactNews(emoji){
+  if(!currentNewsId||!requireUser()) return;
+  try{
+    // جلوگیری از تکرار ساده
+    const {data:ex}=await sb.from('studio_news_reactions').select('id').eq('news_id',currentNewsId).eq('visitor_id',visitorId).eq('reaction',emoji).maybeSingle();
+    if(ex){ toast('قبلاً ثبت شده'); return }
+    const {error}=await sb.from('studio_news_reactions').insert({news_id:currentNewsId,reaction:emoji,visitor_id:visitorId});
+    if(error) throw error;
+    toast('ثبت شد'); loadReactions(currentNewsId);
+  }catch(e){ toast(dbErr(e)) }
+}
+
+async function loadComments(id){
+  const box=$('nd-comments');
+  try{
+    const {data}=await sb.from('studio_news_comments').select('*').eq('news_id',id).order('created_at',{ascending:true}).limit(50);
+    box.innerHTML=(data||[]).length?data.map(c=>`
+      <div class="ticket">
+        <div class="flex justify-between text-[11px] mb-1" style="color:var(--muted)"><b style="color:var(--text)">${esc(c.author_name)}</b><span>${new Date(c.created_at).toLocaleDateString('fa-IR')}</span></div>
+        <div class="text-sm">${esc(c.body)}</div>
+      </div>`).join(''):'<p class="text-xs" style="color:var(--muted)">اولین دیدگاه را بنویسید</p>';
+  }catch(e){ box.innerHTML='' }
+}
+
+async function sendComment(){
+  if(!currentNewsId||!requireUser()) return;
+  const body=($('cmt-body').value||'').trim();
+  if(!body){ toast('متن خالی است'); return }
+  if(body.length>500){ toast('خیلی بلند است'); return }
+  try{
+    const {error}=await sb.from('studio_news_comments').insert({news_id:currentNewsId,author_name:user.username,body});
+    if(error) throw error;
+    $('cmt-body').value=''; toast('ثبت شد'); loadComments(currentNewsId);
+  }catch(e){ toast(dbErr(e)) }
+}
+
+/* COLLAB */
+function pickNet(el){document.querySelectorAll('#net-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');selectedNet=el.getAttribute('data-n')}
+function collabNext(){
+  if(!selectedNet){toast('شبکه را انتخاب کنید');return}
+  $('collab-step1').classList.add('hidden');$('collab-step2').classList.remove('hidden');
+  $('collab-ask').innerHTML='لطفاً آی‌دی خود در <b>'+esc(selectedNet)+'</b> را بنویسید';
+}
+async function submitCollab(){
+  if(!requireUser()) return;
+  let h=($('collab-handle').value||'').trim();
+  if(!selectedNet){toast('شبکه انتخاب نشده');return}
+  if(!h.startsWith('@')||h.length<3){toast('آی‌دی باید با @ شروع شود');return}
+  try{
+    const {error}=await sb.from('studio_collab').insert({network:selectedNet,handle:h,username:user.username,status:'new'});
+    if(error) throw error;
+    $('check-msg').textContent='ادمین لومرا در سریع‌ترین زمان ممکن با شما در '+selectedNet+' ارتباط می‌گیرد';
+    $('check-overlay').classList.add('on');
+  }catch(e){ toast(dbErr(e)) }
+}
+function closeCheck(){ $('check-overlay').classList.remove('on'); go('home') }
+
+/* SUPPORT */
+function pickProduct(p){
+  selectedProduct=p; $('sup-step1').classList.add('hidden'); $('sup-step2').classList.remove('hidden');
+  const cats=p==='لومرا'
+    ?[['پست‌ها / چت / کانال / اکسپلور','مشکل در پست‌ها، چت، کانال و اکسپلور'],['پرداخت VIP','مشکل در پرداخت نسخه VIP'],['سایر مشکلات','سایر مشکلات']]
+    :[['پرداخت','مشکل در پرداخت'],['سایر','سایر مشکلات']];
+  $('sup-cat-title').textContent='موضوع مربوط به '+p;
+  $('sup-cats').innerHTML=cats.map(([k,label])=>`<button class="menu-card" onclick="pickCategory('${k}')"><h3>${label}</h3></button>`).join('');
+}
+function pickCategory(c){
+  selectedCategory=c; $('sup-step2').classList.add('hidden'); $('sup-step3').classList.remove('hidden');
+  $('sup-sum').textContent=selectedProduct+' · '+c; $('sup-msg').value=''; $('sup-contact').value='';
+}
+async function submitSupport(){
+  if(!requireUser()) return;
+  const msg=($('sup-msg').value||'').trim();
+  const contact=($('sup-contact').value||'').trim();
+  if(!selectedProduct||!selectedCategory){toast('موضوع ناقص');return}
+  if(!msg){toast('توضیح بنویسید');return}
+  try{
+    const {error}=await sb.from('studio_support').insert({product:selectedProduct,category:selectedCategory,message:msg,contact:contact||null,username:user.username,status:'new'});
+    if(error) throw error;
+    $('check-msg').textContent='پیام شما برای ادمین ارسال شد. در اسرع وقت پیگیری می‌شود.';
+    $('check-overlay').classList.add('on');
+  }catch(e){ toast(dbErr(e)) }
+}
+
+/* ADMIN — فقط hesam */
+function adminTab(t){
+  if(!requireOwner()) return;
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.toggle('on',b.getAttribute('data-t')===t));
+  $('adm-news').classList.toggle('hidden',t!=='news');
+  $('adm-support').classList.toggle('hidden',t!=='support');
+  $('adm-collab').classList.toggle('hidden',t!=='collab');
+  if(t==='news') loadAdminNews();
+  if(t==='support') loadAdminSupport();
+  if(t==='collab') loadAdminCollab();
+}
+async function publishNews(){
+  if(!requireOwner()) return;
+  const title=($('an-title').value||'').trim();
+  const body=($('an-body').value||'').trim();
+  if(!title||!body){toast('عنوان و متن لازم است');return}
+  try{
+    const {error}=await sb.from('studio_news').insert({title,body});
+    if(error) throw error;
+    $('an-title').value=''; $('an-body').value=''; toast('منتشر شد'); loadAdminNews();
+  }catch(e){ toast(dbErr(e)) }
+}
+async function loadAdminNews(){
+  if(!requireOwner()) return;
+  const box=$('adm-news-list');
+  try{
+    const {data,error}=await sb.from('studio_news').select('*').order('created_at',{ascending:false}).limit(20);
+    if(error) throw error;
+    box.innerHTML=(data||[]).map(n=>`
+      <div class="ticket"><div class="flex justify-between gap-2"><div><b class="text-sm">${esc(n.title)}</b>
+      <p class="text-[11px] mt-1" style="color:var(--muted)">${new Date(n.created_at).toLocaleString('fa-IR')}</p></div>
+      <button class="btn btn-ghost text-[10px]" onclick="deleteNews(${n.id})">حذف</button></div></div>`).join('')||'<p class="text-xs" style="color:var(--muted)">خبری نیست</p>';
+  }catch(e){ box.innerHTML='<p class="text-xs" style="color:var(--danger)">'+esc(dbErr(e))+'</p>' }
+}
+async function deleteNews(id){
+  if(!requireOwner()||!confirm('حذف؟')) return;
+  try{ await sb.from('studio_news').delete().eq('id',id); loadAdminNews(); toast('حذف شد') }catch(e){ toast(dbErr(e)) }
+}
+async function loadAdminSupport(){
+  if(!requireOwner()) return;
+  const box=$('adm-support');
+  try{
+    const {data,error}=await sb.from('studio_support').select('*').order('created_at',{ascending:false}).limit(50);
+    if(error) throw error;
+    box.innerHTML=(data||[]).map(t=>`
+      <div class="ticket">
+        <div class="flex justify-between text-[11px] mb-1"><span class="badge">${esc(t.status)}</span><span style="color:var(--muted)">${new Date(t.created_at).toLocaleString('fa-IR')}</span></div>
+        <div class="text-xs mb-1" style="color:var(--gold2)">${esc(t.product)} · ${esc(t.category)} · @${esc(t.username||'')}</div>
+        <div class="text-sm mb-2">${esc(t.message)}</div>
+        ${t.contact?`<div class="text-[11px] mb-2" style="color:var(--muted)">${esc(t.contact)}</div>`:''}
+        ${t.admin_reply?`<div class="text-xs p-2 rounded-lg mb-2" style="background:rgba(52,211,153,.08)">پاسخ: ${esc(t.admin_reply)}</div>`:''}
+        <div class="flex gap-2">
+          <button class="btn btn-ghost text-[10px] flex-1" onclick="replySupport(${t.id})">پاسخ</button>
+          <button class="btn btn-ghost text-[10px]" onclick="setSupportStatus(${t.id},'done')">انجام شد</button>
+        </div>
+      </div>`).join('')||'<p class="text-xs" style="color:var(--muted)">خالی</p>';
+  }catch(e){ box.innerHTML='<p class="text-xs" style="color:var(--danger)">'+esc(dbErr(e))+'</p>' }
+}
+async function replySupport(id){
+  if(!requireOwner()) return;
+  const msg=prompt('پاسخ ادمین:'); if(msg===null) return;
+  await sb.from('studio_support').update({admin_reply:msg,status:'replied'}).eq('id',id);
+  loadAdminSupport(); toast('ثبت شد');
+}
+async function setSupportStatus(id,st){
+  if(!requireOwner()) return;
+  await sb.from('studio_support').update({status:st}).eq('id',id); loadAdminSupport();
+}
+async function loadAdminCollab(){
+  if(!requireOwner()) return;
+  const box=$('adm-collab');
+  try{
+    const {data,error}=await sb.from('studio_collab').select('*').order('created_at',{ascending:false}).limit(50);
+    if(error) throw error;
+    box.innerHTML=(data||[]).map(c=>`
+      <div class="ticket">
+        <div class="flex justify-between text-[11px] mb-1"><span class="badge">${esc(c.status)}</span><span style="color:var(--muted)">${new Date(c.created_at).toLocaleString('fa-IR')}</span></div>
+        <div class="text-sm"><b>${esc(c.network)}</b> · <span dir="ltr">${esc(c.handle)}</span> · @${esc(c.username||'')}</div>
+        <div class="flex gap-2 mt-2">
+          <button class="btn btn-ghost text-[10px] flex-1" onclick="setCollab(${c.id},'contacted')">تماس گرفته شد</button>
+          <button class="btn btn-ghost text-[10px]" onclick="setCollab(${c.id},'done')">بسته</button>
+        </div>
+      </div>`).join('')||'<p class="text-xs" style="color:var(--muted)">خالی</p>';
+  }catch(e){ box.innerHTML='<p class="text-xs" style="color:var(--danger)">'+esc(dbErr(e))+'</p>' }
+}
+async function setCollab(id,st){
+  if(!requireOwner()) return;
+  await sb.from('studio_collab').update({status:st}).eq('id',id); loadAdminCollab(); toast('به‌روز شد');
+}
+
+document.getElementById('gate-user').addEventListener('keydown',e=>{ if(e.key==='Enter') enterGate() });
+</script>
+</body>
+</html>
